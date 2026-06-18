@@ -1,8 +1,10 @@
+# importlib.util: 动态加载 Python 模块（类似 Java 的 URLClassLoader 或反射加载）
 import importlib.util
 import os
 import sys
-import tempfile
-import types
+import tempfile  # 临时目录（类似 Java Files.createTempDirectory()）
+import types  # 动态创建模块/类（类似 Java 的 Proxy / cglib）
+# unittest 是 Python 标准测试框架（类似 JUnit 4，使用 TestCase 继承 + test_ 前缀方法）
 import unittest
 from pathlib import Path
 
@@ -107,6 +109,8 @@ def assert_no_orphan_tool_results(testcase, messages):
         testcase.assertTrue(message_has_tool_use(messages[idx - 1]), messages)
 
 
+# unittest.TestCase 是测试基类（类似 JUnit 4 的 TestCase 或 JUnit 5 的 @Test 注解类）
+# 每个 test_ 前缀的方法是一个测试用例
 class CompactionToolPairTests(unittest.TestCase):
     def test_snip_compact_keeps_head_tool_pair(self):
         messages = [

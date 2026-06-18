@@ -47,9 +47,12 @@ if os.getenv("ANTHROPIC_BASE_URL"):
 WORKDIR = Path.cwd()
 client = Anthropic(base_url=os.getenv("ANTHROPIC_BASE_URL"))
 MODEL = os.environ["MODEL_ID"]
+# 模块级变量，带类型注解（类似 Java 的 static List<Map> currentTodos）
+# list[dict] 表示"字典列表"（类似 Java List<Map<String, Object>>）
 CURRENT_TODOS: list[dict] = []
 
 # s05 change: SYSTEM prompt adds planning guidance
+# Python 中相邻字符串字面量自动拼接："a" "b" 等价于 "ab"
 SYSTEM = (
     f"You are a coding agent at {WORKDIR}. "
     "Before starting any multi-step task, use todo_write to plan your steps. "

@@ -135,6 +135,8 @@ TOOLS = [
 #  NEW in s02: 工具分发映射（s01 是硬编码 run_bash，现在改为查表）
 # ═══════════════════════════════════════════════════════════
 
+# ── 工具分发映射（策略模式的查表实现）──────────────────────
+# Python 中函数是一等公民，可以直接作为 dict 的 value（Java 需要 Function<T,R> 接口封装）
 TOOL_HANDLERS = {
     "bash": run_bash, "read_file": run_read, "write_file": run_write,
     "edit_file": run_edit, "glob": run_glob,
@@ -162,6 +164,8 @@ def agent_loop(messages: list):
         for block in response.content:
             if block.type == "tool_use":
                 print(f"\033[33m> {block.name}\033[0m")
+                # dict.get(key) 安全取值（Java: map.get(key) 返回 null）
+                # handler(**block.input): ** 将 LLM 返回的 JSON dict 解包为函数参数
                 handler = TOOL_HANDLERS.get(block.name)
                 output = handler(**block.input) if handler else f"Unknown: {block.name}"
                 print(str(output)[:200])

@@ -24,7 +24,8 @@ ASCII flow:
                                               continue      other? -> log + exit
 """
 
-import os, subprocess, time, random, json
+# s11: 错误恢复 — 类似 Java 中的 RetryTemplate + Resilience4j 的三种恢复路径
+import os, subprocess, time, random, json  # random 用于指数退避的抖动（jitter）
 from pathlib import Path
 
 try:

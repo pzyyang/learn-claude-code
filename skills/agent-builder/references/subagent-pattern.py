@@ -119,26 +119,18 @@ Example uses:
 def run_task(description: str, prompt: str, agent_type: str,
              client, model: str, workdir, base_tools: list, execute_tool) -> str:
     """
-    Execute a subagent task with isolated context.
+    执行子 Agent 任务（在隔离的上下文中）。
+    类似 Java 的 ForkJoinTask：独立栈空间 + 受限权限 + 仅返回摘要。
 
-    Key concepts:
-    1. ISOLATED HISTORY - subagent starts fresh, no parent context
-    2. FILTERED TOOLS - based on agent type permissions
-    3. AGENT-SPECIFIC PROMPT - specialized behavior
-    4. RETURNS SUMMARY ONLY - parent sees just the final result
+    关键概念：
+    1. ISOLATED HISTORY - 子 Agent 从空消息历史开始（类似新线程的独立调用栈）
+    2. FILTERED TOOLS - 根据 Agent 类型限制可用工具（只读 Agent 不能写入文件）
+    3. AGENT-SPECIFIC PROMPT - 不同类型使用不同的 System Prompt
+    4. RETURNS SUMMARY ONLY - 父 Agent 只看到最终摘要，中间过程丢弃
 
-    Args:
-        description: Short name for progress display
-        prompt: Detailed instructions for subagent
-        agent_type: Key from AGENT_TYPES
-        client: Anthropic client
-        model: Model to use
-        workdir: Working directory
-        base_tools: List of tool definitions
-        execute_tool: Function to execute tools
-
-    Returns:
-        Final text output from subagent
+    参数：
+        execute_tool: 函数引用（Python 中函数是一等公民，可作为参数传递，
+                      类似 Java 的 Function<T,R> 或方法引用）
     """
     if agent_type not in AGENT_TYPES:
         return f"Error: Unknown agent type '{agent_type}'"

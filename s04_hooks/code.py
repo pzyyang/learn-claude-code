@@ -156,15 +156,22 @@ TOOL_HANDLERS = {
 #  NEW in s04: Hook System (s03 permission logic now via hooks)
 # ═══════════════════════════════════════════════════════════
 
+# ── Hook 系统（观察者模式 / 事件驱动架构）──────────────────
+# 类似 Java 的 EventListener 或 Spring 的 @EventListener 注解
+# HOOKS 是一个 dict[str, list[function]]：每个事件类型对应一个回调函数列表
 HOOKS = {"UserPromptSubmit": [], "PreToolUse": [], "PostToolUse": [], "Stop": []}
 
 def register_hook(event: str, callback):
+    # 注册回调（类似 Java: eventListeners.get(event).add(callback)）
     HOOKS[event].append(callback)
 
 def trigger_hooks(event: str, *args):
+    # *args 可变参数：将所有参数打包成 tuple（类似 Java 的 varargs: Object... args）
+    # 遍历所有已注册的回调函数
     for callback in HOOKS[event]:
-        result = callback(*args)
+        result = callback(*args)  # *args 解包：将 tuple 展开为独立参数
         if result is not None:  # teaching shortcut: block this tool call
+            # 非 None 返回值表示"拦截"（类似 Java Filter.doFilter 返回 false）
             return result
     return None
 

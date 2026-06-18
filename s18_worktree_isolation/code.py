@@ -26,7 +26,8 @@ ASCII topology:
     └── .worktrees/events.jsonl
 """
 
-import os, subprocess, json, time, random, threading, re
+# s18: Git Worktree 隔离 — 类似 Java 中的多线程文件系统隔离 + 任务-目录绑定
+import os, subprocess, json, time, random, threading, re  # re: 正则表达式，用于验证 worktree 名称
 from pathlib import Path
 from datetime import datetime
 from dataclasses import dataclass, asdict, field

@@ -38,20 +38,28 @@ if os.getenv("ANTHROPIC_BASE_URL"):
 WORKDIR = Path.cwd()
 client = Anthropic(base_url=os.getenv("ANTHROPIC_BASE_URL"))
 MODEL = os.environ["MODEL_ID"]
+# Path / "dir" 用 / 拼接路径（类似 Java Path.resolve("dir")）
 TASKS_DIR = WORKDIR / ".tasks"
 
 SYSTEM = f"You are a coding agent at {WORKDIR}. Use task tools to plan and track work."
 
 
 # -- TaskManager: CRUD with dependency graph, persisted as JSON files --
+# 类似 Java 的 Repository 模式：任务状态持久化到 .tasks/ 目录的 JSON 文件
+# 每个任务就是一个 JSON 文件（类似 document database 的思想）
 class TaskManager:
     def __init__(self, tasks_dir: Path):
         self.dir = tasks_dir
-        self.dir.mkdir(exist_ok=True)
+        self.dir.mkdir(exist_ok=True)  # 确保目录存在（类似 Java Files.createDirectories）
         self._next_id = self._max_id() + 1
 
     def _max_id(self) -> int:
+        # 列表推导式扫描所有 task_*.json 文件，提取最大 ID
+        # f.stem 获取不含扩展名的文件名（类似 Java Path.getFileName() 然后去后缀）
+        # split("_")[1] 取下划线分割后的第二部分
         ids = [int(f.stem.split("_")[1]) for f in self.dir.glob("task_*.json")]
+        # max() 内置函数取最大值（类似 Java Collections.max()）
+        # "ids if ids else 0" 是三元表达式（Java: ids.isEmpty() ? 0 : Collections.max(ids)）
         return max(ids) if ids else 0
 
     def _load(self, task_id: int) -> dict:
@@ -93,9 +101,12 @@ class TaskManager:
         return json.dumps(task, indent=2, ensure_ascii=False)
 
     def _clear_dependency(self, completed_id: int):
-        """Remove completed_id from all other tasks' blockedBy lists."""
+        """任务完成时，从所有其他任务的 blockedBy 列表中移除该任务 ID。
+        类似在数据库外键关系表中级联更新依赖状态。"""
         for f in self.dir.glob("task_*.json"):
             task = json.loads(f.read_text())
+            # Python 的 "in" 运算符判断元素是否在列表中（Java: list.contains(x)）
+            # dict.get(key, default) 在 key 不存在时返回默认值
             if completed_id in task.get("blockedBy", []):
                 task["blockedBy"].remove(completed_id)
                 self._save(task)

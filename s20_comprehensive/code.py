@@ -11,11 +11,12 @@ memory, prompt assembly, error recovery, task graph, background tasks, cron,
 teams, protocols, autonomous agents, worktrees, and MCP.
 """
 
+# s20 综合了所有教学模式：从 s01-s19 的所有组件
 import ast, json, os, subprocess, time, random, threading, re
 from pathlib import Path
 from datetime import datetime
-from dataclasses import dataclass, asdict, field
-import yaml
+from dataclasses import dataclass, asdict, field  # 数据类三件套（类似 Java Lombok @Data + BeanUtils + @Builder）
+import yaml  # YAML 解析（类似 Java SnakeYAML）
 
 try:
     import readline

@@ -47,20 +47,25 @@ SYSTEM = f"You are a coding agent at {WORKDIR}. Use background_run for long-runn
 
 
 # -- BackgroundManager: threaded execution + notification queue --
+# 类似 Java 的 ExecutorService + BlockingQueue 模式
+# daemon=True: 守护线程，主线程退出时自动终止（Java: setDaemon(true)）
 class BackgroundManager:
     def __init__(self):
-        self.tasks = {}  # task_id -> {status, result, command}
-        self._notification_queue = []  # completed task results
-        self._lock = threading.Lock()
+        self.tasks = {}  # task_id -> {status, result, command} 字典
+        self._notification_queue = []  # 已完成任务的通知队列
+        self._lock = threading.Lock()  # 互斥锁（类似 Java ReentrantLock 或 synchronized）
 
     def run(self, command: str) -> str:
-        """Start a background thread, return task_id immediately."""
+        """启动后台线程，立即返回 task_id（Fire-and-forget 模式）。"""
+        # str(uuid.uuid4())[:8] 生成随机短 ID（类似 Java UUID.randomUUID().toString().substring(0,8)）
         task_id = str(uuid.uuid4())[:8]
         self.tasks[task_id] = {"status": "running", "result": None, "command": command}
+        # 创建线程：target 是要在线程中执行的函数（类似 Java Runnable.run()）
+        # daemon=True: 守护线程，主线程结束时自动终止
         thread = threading.Thread(
             target=self._execute, args=(task_id, command), daemon=True
         )
-        thread.start()
+        thread.start()  # 启动线程（Java: thread.start()）
         return f"Background task {task_id} started: {command[:80]}"
 
     def _execute(self, task_id: str, command: str):

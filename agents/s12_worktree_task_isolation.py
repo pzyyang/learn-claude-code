@@ -51,8 +51,10 @@ MODEL = os.environ["MODEL_ID"]
 
 
 def detect_repo_root(cwd: Path) -> Path | None:
-    """Return git repo root if cwd is inside a repo, else None."""
+    """检测 git 仓库根目录。Path | None 表示返回 Path 或 None（类似 Java Optional<Path>）。
+    在非 git 环境中降级为当前工作目录。"""
     try:
+        # 执行 git 命令获取仓库根路径（类似 Java ProcessBuilder）
         r = subprocess.run(
             ["git", "rev-parse", "--show-toplevel"],
             cwd=cwd,
@@ -60,7 +62,7 @@ def detect_repo_root(cwd: Path) -> Path | None:
             text=True,
             timeout=10,
         )
-        if r.returncode != 0:
+        if r.returncode != 0:  # git 命令失败（不在 git 仓库中）
             return None
         root = Path(r.stdout.strip())
         return root if root.exists() else None

@@ -49,14 +49,17 @@ TASKS_DIR = WORKDIR / ".tasks"
 TASKS_DIR.mkdir(exist_ok=True)
 
 
+# @dataclass 装饰器：自动生成 __init__/__repr__/__eq__ 方法
+# 类似 Java 的 Lombok @Data 或 Java 14+ record 关键字
+# 字段类型注解（id: str）是提示，运行时不做强制检查
 @dataclass
 class Task:
-    id: str
+    id: str               # 类似 Java: private String id;
     subject: str
     description: str
-    status: str          # pending | in_progress | completed
-    owner: str | None    # Agent name (multi-agent scenarios)
-    blockedBy: list[str] # Dependency task IDs
+    status: str            # pending | in_progress | completed
+    owner: str | None      # str | None = 可选字符串（类似 Java Optional<String> 或 @Nullable String）
+    blockedBy: list[str]   # 字符串列表（类似 Java List<String>），依赖的任务 ID 列表
 
 
 def _task_path(task_id: str) -> Path:

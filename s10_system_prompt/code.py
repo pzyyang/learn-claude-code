@@ -39,6 +39,9 @@ MODEL = os.environ["MODEL_ID"]
 
 # ── Prompt Sections ──
 
+# Prompt 分段字典 — 类似 Java 的 Map<String, String> 存储不同主题的提示文本
+# 运行时根据实际状态（有记忆？有工具？）动态组装 System Prompt
+# 这是「延迟组装」vs「硬编码字符串」的对比
 PROMPT_SECTIONS = {
     "identity": "You are a coding agent. Act, don't explain.",
     "tools": "Available tools: bash, read_file, write_file.",
@@ -64,20 +67,24 @@ def assemble_system_prompt(context: dict) -> str:
     return "\n\n".join(sections)
 
 
-_last_context_key = None
+# ── Prompt 缓存（类似 Java Memoizer / Guava Cache）──────────
+# Python 中在一行声明多个变量并赋初值
+_last_context_key = None  # None 相当于 Java 的 null
 _last_prompt = None
 
 
 def get_system_prompt(context: dict) -> str:
-    """Cache wrapper — reassemble only when context changes.
+    """缓存包装器 — 仅当 context 变化时才重新拼装 System Prompt。
 
-    Uses json.dumps for deterministic serialization, not Python's hash()
-    which has process randomization and fails on nested dicts/lists.
-    This cache only avoids redundant string assembly within a process.
-    Real Claude Code additionally protects API-level prompt cache via
-    stable section ordering and SYSTEM_PROMPT_DYNAMIC_BOUNDARY.
+    使用 json.dumps 做确定性序列化，而非 Python 的 hash()（Python hash
+    有进程级别随机化，且对嵌套 dict/list 会失败）。此缓存仅避免同一进程
+    内冗余的字符串组装。真实 Claude Code 额外通过稳定 section 排序和
+    SYSTEM_PROMPT_DYNAMIC_BOUNDARY 保护 API 级 prompt cache。
     """
+    # global 声明：修改模块级变量（类似 Java 中修改 static 字段）
     global _last_context_key, _last_prompt
+    # json.dumps() 将 dict 序列化为 JSON 作为缓存键
+    # sort_keys=True 保证 JSON key 顺序一致，避免 {"a":1,"b":2} ≠ {"b":2,"a":1}
     key = json.dumps(context, sort_keys=True, ensure_ascii=False, default=str)
     if key == _last_context_key and _last_prompt:
         print("  \033[90m[cache hit] system prompt unchanged\033[0m")
@@ -88,6 +95,7 @@ def get_system_prompt(context: dict) -> str:
     loaded = ["identity", "tools", "workspace"]
     if context.get("memories"):
         loaded.append("memory")
+    # ", ".join(list) 类似 Java String.join(", ", list)
     print(f"  \033[32m[assembled] sections: {', '.join(loaded)}\033[0m")
     return _last_prompt
 

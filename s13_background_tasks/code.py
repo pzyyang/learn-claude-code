@@ -23,6 +23,7 @@ reactive compact, fallback model) is omitted.
 
 import os, subprocess, json, time, random, threading
 from pathlib import Path
+# dataclass 装饰器 + asdict 转换函数（类似 Java Lombok @Data + BeanUtils.describe()）
 from dataclasses import dataclass, asdict
 
 try:

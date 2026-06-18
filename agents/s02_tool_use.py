@@ -21,6 +21,8 @@ Key insight: "The loop didn't change at all. I just added tools."
 
 import os
 import subprocess
+# pathlib.Path 是现代文件路径类（类似 Java 的 java.nio.file.Path）
+# 支持 / 运算符拼接路径（Java 用 Path.resolve()）
 from pathlib import Path
 
 from anthropic import Anthropic
@@ -39,7 +41,11 @@ SYSTEM = f"You are a coding agent at {WORKDIR}. Use tools to solve tasks. Act, d
 
 
 def safe_path(p: str) -> Path:
+    # / 运算符：Path 重载了 / 用于路径拼接（Java: Path.resolve()）
+    # .resolve() 解析为绝对路径（Java: toAbsolutePath().normalize()）
     path = (WORKDIR / p).resolve()
+    # .is_relative_to() 安全检查（Python 3.9+），防止路径穿越攻击
+    # 类似 Java 中确保路径在沙箱目录内
     if not path.is_relative_to(WORKDIR):
         raise ValueError(f"Path escapes workspace: {p}")
     return path
@@ -92,7 +98,10 @@ def run_edit(path: str, old_text: str, new_text: str) -> str:
         return f"Error: {e}"
 
 
-# -- The dispatch map: {tool_name: handler} --
+# ── 工具分发映射（策略模式）──────────────────────────────────
+# dict 的 value 是 lambda 函数，将 LLM JSON 参数适配为具体函数调用
+# lambda **kw: 接收任意关键字参数，kw 是一个 dict<String, Object>
+# kw.get("limit") 安全取值（类似 Java Map.getOrDefault()，不存在返回 None）
 TOOL_HANDLERS = {
     "bash":       lambda **kw: run_bash(kw["command"]),
     "read_file":  lambda **kw: run_read(kw["path"], kw.get("limit")),
@@ -125,6 +134,9 @@ def agent_loop(messages: list):
         for block in response.content:
             if block.type == "tool_use":
                 handler = TOOL_HANDLERS.get(block.name)
+                # handler(**block.input)：** 将 dict 解包为关键字参数
+                # 例如 handler(**{"command": "ls"}) 等价于 handler(command="ls")
+                # 这类似 Java 反射调用 + 自动参数映射
                 output = handler(**block.input) if handler else f"Unknown tool: {block.name}"
                 print(f"> {block.name}:")
                 print(output[:200])

@@ -5,6 +5,10 @@ Minimal Agent Template - Copy and customize this.
 This is the simplest possible working agent (~80 lines).
 It has everything you need: 3 tools + loop.
 
+这是最简单的可运行 Agent 模板（~80 行）。
+包含所有必要元素：3 个工具 + Agent Loop。
+类似 Java 中的 "Hello World" Spring Boot 应用 —— 展示最少必要组件。
+
 Usage:
     1. Set ANTHROPIC_API_KEY environment variable
     2. python minimal-agent.py

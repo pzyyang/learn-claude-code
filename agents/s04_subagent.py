@@ -39,6 +39,8 @@ WORKDIR = Path.cwd()
 client = Anthropic(base_url=os.getenv("ANTHROPIC_BASE_URL"))
 MODEL = os.environ["MODEL_ID"]
 
+# 两个 SYStem prompt：父 Agent 和子 Agent 使用不同的指令
+# 类似 Java 中给主线程和子线程传入不同的配置
 SYSTEM = f"You are a coding agent at {WORKDIR}. Use the task tool to delegate exploration or subtasks."
 SUBAGENT_SYSTEM = f"You are a coding subagent at {WORKDIR}. Complete the given task, then summarize your findings."
 
@@ -115,9 +117,12 @@ CHILD_TOOLS = [
 
 
 # -- Subagent: fresh context, filtered tools, summary-only return --
+# 子 Agent 的核心模式：独立的消息历史（context isolation）+ 限制工具（no recursive task spawning）
 def run_subagent(prompt: str) -> str:
+    # 全新的消息列表（独立的 context，类似 Java ForkJoinTask 的独立栈）
     sub_messages = [{"role": "user", "content": prompt}]  # fresh context
-    for _ in range(30):  # safety limit
+    # for _ in range(30)：_ 是 Python 惯用"不使用的变量名"（类似 Java 的 for (int i=0; i<30; i++)）
+    for _ in range(30):  # safety limit — 防止无限循环
         response = client.messages.create(
             model=MODEL, system=SUBAGENT_SYSTEM, messages=sub_messages,
             tools=CHILD_TOOLS, max_tokens=8000,
@@ -132,7 +137,9 @@ def run_subagent(prompt: str) -> str:
                 output = handler(**block.input) if handler else f"Unknown tool: {block.name}"
                 results.append({"type": "tool_result", "tool_use_id": block.id, "content": str(output)[:50000]})
         sub_messages.append({"role": "user", "content": results})
-    # Only the final text returns to the parent -- child context is discarded
+    # 只返回最终文本摘要，子 Agent 的上下文被丢弃（核心设计！）
+    # hasattr() 反射检查属性（类似 Java 的 Class.getDeclaredField() != null）
+    # "".join() 拼接字符串列表（Java: String.join("", texts) 或 Collectors.joining()）
     return "".join(b.text for b in response.content if hasattr(b, "text")) or "(no summary)"
 
 

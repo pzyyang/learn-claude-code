@@ -78,10 +78,11 @@ VALID_MSG_TYPES = {
     "plan_approval_response",
 }
 
-# -- Request trackers: correlate by request_id --
-shutdown_requests = {}
+# -- 请求追踪器：通过 request_id 关联请求和响应 --
+# 类似 Java 的 ConcurrentHashMap + 异步请求追踪（如 CompletableFuture 的关联 ID）
+shutdown_requests = {}  # 空 dict（类似 Java new HashMap<>()）
 plan_requests = {}
-_tracker_lock = threading.Lock()
+_tracker_lock = threading.Lock()  # 线程锁（类似 Java ReentrantLock），保护共享字典的并发访问
 
 
 # -- MessageBus: JSONL inbox per teammate --

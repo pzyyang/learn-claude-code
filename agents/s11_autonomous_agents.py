@@ -57,8 +57,9 @@ TEAM_DIR = WORKDIR / ".team"
 INBOX_DIR = TEAM_DIR / "inbox"
 TASKS_DIR = WORKDIR / ".tasks"
 
-POLL_INTERVAL = 5
-IDLE_TIMEOUT = 60
+# 自主 Agent 的空闲轮询参数（类似 Java ScheduledExecutorService 的调度参数）
+POLL_INTERVAL = 5   # 每 5 秒轮询一次 inbox 和任务板
+IDLE_TIMEOUT = 60   # 60 秒无新任务则自动 shutdown
 
 SYSTEM = f"You are a team lead at {WORKDIR}. Teammates are autonomous -- they find work themselves."
 

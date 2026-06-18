@@ -21,7 +21,7 @@ ASCII flow:
   agent_loop uses assembled pool
 """
 
-import os, subprocess, json, time, random, threading, re
+import os, subprocess, json, time, random, threading, re  # re 正则表达式模块（类似 java.util.regex）
 from pathlib import Path
 from datetime import datetime
 from dataclasses import dataclass, asdict, field

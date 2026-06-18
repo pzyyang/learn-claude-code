@@ -42,9 +42,9 @@ import re
 import subprocess
 import threading
 import time
-import uuid
+import uuid  # 生成 UUID（类似 Java java.util.UUID）
 from pathlib import Path
-from queue import Queue
+from queue import Queue  # 线程安全队列（类似 Java BlockingQueue / ConcurrentLinkedQueue）
 
 from anthropic import Anthropic
 from dotenv import load_dotenv
@@ -120,6 +120,8 @@ def run_edit(path: str, old_text: str, new_text: str) -> str:
 
 
 # === SECTION: todos (s03) ===
+# TodoManager：内存中的任务清单（类似 Java 的 @Component 状态管理）
+# Python 类默认继承 object（类似 Java 默认继承 java.lang.Object）
 class TodoManager:
     def __init__(self):
         self.items = []
@@ -225,6 +227,7 @@ class SkillLoader:
 
 # === SECTION: compression (s06) ===
 def estimate_tokens(messages: list) -> int:
+    # // 整数除法（类似 Java Math.floorDiv()，5 // 2 = 2）
     return len(json.dumps(messages, default=str)) // 4
 
 def microcompact(messages: list):

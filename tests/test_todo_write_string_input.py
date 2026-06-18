@@ -67,6 +67,8 @@ def load_course_module(module_name: str, module_path: Path, temp_cwd: Path):
 
 class TodoWriteStringInputTests(unittest.TestCase):
     def test_issue_340_accepts_json_array_string(self):
+        # 参数化子测试：对每个课程模块运行相同的测试
+        # self.subTest 类似 JUnit 5 @ParameterizedTest，每个子测试独立统计
         for module_name, module_path in COURSE_MODULES:
             with self.subTest(module=module_name), tempfile.TemporaryDirectory() as tmp:
                 module = load_course_module(module_name, module_path, Path(tmp))

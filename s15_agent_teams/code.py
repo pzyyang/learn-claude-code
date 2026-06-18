@@ -20,7 +20,8 @@ ASCII flow:
   Teammate: inbox → LLM → bash/read/write/send → loop (max 10 turns)
 """
 
-import os, subprocess, json, time, random, threading
+# s15: Agent Teams — 类似 Java 中的多线程 Actor 模型 + 文件消息队列
+import os, subprocess, json, time, random, threading  # threading 用于后台线程运行 teammates
 from pathlib import Path
 from datetime import datetime
 from dataclasses import dataclass, asdict

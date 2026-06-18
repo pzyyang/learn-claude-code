@@ -49,8 +49,10 @@ def load_s_full_module(temp_cwd: Path):
             sys.modules["dotenv"] = previous_dotenv
 
 
+# unittest.TestCase 测试基类（类似 JUnit 4 TestCase 或 JUnit 5 @Test）
 class BackgroundManagerTests(unittest.TestCase):
     def test_check_returns_running_placeholder_when_result_is_none(self):
+        # self.assertEqual() 断言相等（类似 JUnit assertEquals(expected, actual)）
         with tempfile.TemporaryDirectory() as tmp:
             module = load_s_full_module(Path(tmp))
             manager = module.BackgroundManager()

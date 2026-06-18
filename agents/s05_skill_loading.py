@@ -36,9 +36,9 @@ Key insight: "Don't put everything in the system prompt. Load on demand."
 """
 
 import os
-import re
+import re  # 正则表达式（类似 Java java.util.regex）
 import subprocess
-import yaml
+import yaml  # YAML 解析库（类似 Java SnakeYAML 或 Jackson YAML）
 from pathlib import Path
 
 from anthropic import Anthropic
@@ -56,27 +56,39 @@ SKILLS_DIR = WORKDIR / "skills"
 
 
 # -- SkillLoader: scan skills/<name>/SKILL.md with YAML frontmatter --
+# 类似 Java 的 @Service 组件：启动时扫描 skills/ 目录，构建技能注册表
+# Skill 的两层加载模式：
+#   Layer 1 (cheap): 技能名称 + 简短描述注入 System Prompt（~100 tokens/skill）
+#   Layer 2 (on demand): 完整 SKILL.md 内容通过 tool_result 加载（~2000 tokens/skill）
 class SkillLoader:
     def __init__(self, skills_dir: Path):
         self.skills_dir = skills_dir
+        # self.skills 是 dict（类似 Java Map<String, SkillInfo>）
         self.skills = {}
-        self._load_all()
+        self._load_all()  # 构造时即扫描所有技能文件（类似 Java @PostConstruct）
 
     def _load_all(self):
         if not self.skills_dir.exists():
             return
+        # rglob() 递归查找所有 SKILL.md 文件（类似 Java Files.walk() + glob）
+        # sorted() 保证可重复的遍历顺序（Java: sorted(paths, Comparator.naturalOrder())）
         for f in sorted(self.skills_dir.rglob("SKILL.md")):
             text = f.read_text()
             meta, body = self._parse_frontmatter(text)
+            # dict.get(key, default) 安全取值（Java: map.getOrDefault(key, default)）
             name = meta.get("name", f.parent.name)
             self.skills[name] = {"meta": meta, "body": body, "path": str(f)}
 
     def _parse_frontmatter(self, text: str) -> tuple:
-        """Parse YAML frontmatter between --- delimiters."""
+        """Parse YAML frontmatter between --- delimiters.
+        解析 SKILL.md 文件顶部的 YAML 元数据（类似解析 JSON/XML 的配置头）"""
+        # re.DOTALL 让 . 匹配换行符（类似 Java Pattern.DOTALL）
         match = re.match(r"^---\n(.*?)\n---\n(.*)", text, re.DOTALL)
         if not match:
             return {}, text
         try:
+            # yaml.safe_load() 安全解析 YAML（类似 Java SnakeYAML 的 new Yaml().load()）
+            # 返回 dict 类型（类似 Java Map）
             meta = yaml.safe_load(match.group(1)) or {}
         except yaml.YAMLError:
             meta = {}

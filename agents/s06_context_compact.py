@@ -61,32 +61,37 @@ PRESERVE_RESULT_TOOLS = {"read_file"}
 
 
 def estimate_tokens(messages: list) -> int:
-    """Rough token count: ~4 chars per token."""
+    """估算 token 数量（粗略：~4 字符 = 1 token）。
+    // 是整数除法（Python 3: 5 // 2 = 2），相当于 Java 的 Math.floorDiv()"""
     return len(str(messages)) // 4
 
 
 # -- Layer 1: micro_compact - replace old tool results with placeholders --
 def micro_compact(messages: list) -> list:
-    # Collect (msg_index, part_index, tool_result_dict) for all tool_result entries
+    # 扫描所有 tool_result 块，记录 (消息索引, 块索引, 工具结果字典)
+    # enumerate() 返回 (index, value) 对，类似带索引的 for-each
     tool_results = []
     for msg_idx, msg in enumerate(messages):
+        # isinstance() 运行时类型检查（类似 Java 的 instanceof）
         if msg["role"] == "user" and isinstance(msg.get("content"), list):
             for part_idx, part in enumerate(msg["content"]):
                 if isinstance(part, dict) and part.get("type") == "tool_result":
+                    # tuple (msg_idx, part_idx, part) — 收集位置和内容
                     tool_results.append((msg_idx, part_idx, part))
     if len(tool_results) <= KEEP_RECENT:
         return messages
-    # Find tool_name for each result by matching tool_use_id in prior assistant messages
+    # 在之前的 assistant 消息中，通过 tool_use_id 匹配工具名称
     tool_name_map = {}
     for msg in messages:
         if msg["role"] == "assistant":
             content = msg.get("content", [])
             if isinstance(content, list):
                 for block in content:
+                    # hasattr() 动态属性检查（类似 Java 反射 getDeclaredField()）
                     if hasattr(block, "type") and block.type == "tool_use":
                         tool_name_map[block.id] = block.name
-    # Clear old results (keep last KEEP_RECENT). Preserve read_file outputs because
-    # they are reference material; compacting them forces the agent to re-read files.
+    # 删除旧结果（保留最近 KEEP_RECENT 个），保留 read_file 输出（它们是参考资料）
+    # tool_results[:-KEEP_RECENT]：切片取除最后 KEEP_RECENT 个外的所有元素
     to_clear = tool_results[:-KEEP_RECENT]
     for _, _, result in to_clear:
         if not isinstance(result.get("content"), str) or len(result["content"]) <= 100:

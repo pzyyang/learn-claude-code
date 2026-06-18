@@ -145,22 +145,31 @@ TOOL_HANDLERS = {
 #  NEW in s03: Three-Gate Permission Pipeline
 # ═══════════════════════════════════════════════════════════
 
-# Gate 1: Hard deny list — always forbidden
+# ── 三级权限管道（Chain of Responsibility 模式）────────────
+# Gate 1: 硬拒绝列表（类似 Java Filter 的 denyAll）
+# Gate 2: 规则匹配（类似 Java SecurityManager.checkPermission）
+# Gate 3: 用户确认（类似 sudo 密码确认）
+
+# Gate 1: 硬拒绝列表 — 始终禁止的危险命令
 DENY_LIST = ["rm -rf /", "sudo", "shutdown", "reboot", "mkfs", "dd if=", "> /dev/sda"]
 
 def check_deny_list(command: str) -> str | None:
+    # str | None 表示可返回 str 或 None（类似 Java Optional<String>）
     for pattern in DENY_LIST:
+        # Python "in" 是子串包含判断（类似 Java String.contains()）
         if pattern in command:
             return f"Blocked: '{pattern}' is on the deny list"
-    return None
+    return None  # None 相当于 Java 的 null 或 Optional.empty()
 
 
-# Gate 2: Rule matching — context-dependent checks
+# Gate 2: 规则匹配 — 上下文敏感的检查
+# lambda 匿名函数用于定义规则条件（类似 Java 箭头函数 Predicate<Map>）
 PERMISSION_RULES = [
     {"tools": ["write_file", "edit_file"],
      "check": lambda args: not (WORKDIR / args.get("path", "")).resolve().is_relative_to(WORKDIR),
      "message": "Writing outside workspace"},
     {"tools": ["bash"],
+     # any(生成器表达式) 类似 Java Stream.anyMatch()
      "check": lambda args: any(kw in args.get("command", "") for kw in ["rm ", "> /etc/", "chmod 777"]),
      "message": "Potentially destructive command"},
 ]

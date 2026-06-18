@@ -24,8 +24,8 @@ Four layers:
 
 import os, subprocess, json, time, random, threading
 from pathlib import Path
-from datetime import datetime
-from dataclasses import dataclass, asdict
+from datetime import datetime  # 日期时间（类似 Java java.time.LocalDateTime）
+from dataclasses import dataclass, asdict  # 数据类装饰器（类似 Java Lombok @Data / Record）
 
 try:
     import readline

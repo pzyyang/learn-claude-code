@@ -27,7 +27,7 @@ ASCII flow:
 import os, subprocess, json, time, random, threading
 from pathlib import Path
 from datetime import datetime
-from dataclasses import dataclass, asdict, field
+from dataclasses import dataclass, asdict, field  # field() 用于 dataclass 中可变默认值（类似 Java Lombok @Builder.Default）
 
 try:
     import readline

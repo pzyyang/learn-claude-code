@@ -252,12 +252,14 @@ def run_edit_file(path: str, old_text: str, new_text: str) -> str:
 
 def execute_tool(name: str, args: dict) -> str:
     """
-    Dispatch tool call to implementation.
+    工具分发器（策略模式 + 工厂模式）。
+    类似 Java 的 Map<String, Function<Args, String>> + switch 语句。
 
-    This pattern makes it easy to add new tools:
-    1. Add definition to TOOLS list
-    2. Add implementation function
-    3. Add case to this dispatcher
+    添加新工具的步骤：
+    1. 在 TOOLS 列表中添加 JSON Schema 定义
+    2. 实现对应的 Python 函数
+    3. 在此分发器中添加一个 if 分支
+    （注意：实际 Claude Code 使用 dict 映射表而非 if/elif 链，更高效）
     """
     if name == "bash":
         return run_bash(args["command"])

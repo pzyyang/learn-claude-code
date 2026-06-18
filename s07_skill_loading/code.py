@@ -51,13 +51,15 @@ CURRENT_TODOS: list[dict] = []
 
 # s07: Skill catalog scan (used by build_system below)
 def _parse_frontmatter(text: str) -> tuple[dict, str]:
-    """Parse YAML frontmatter from SKILL.md. Returns (meta, body)."""
+    """解析 SKILL.md 中的 YAML 前置元数据（类似解析 JSON 配置文件头）。
+    返回 (meta, body) 元组，meta 是 dict，body 是去除元数据的正文。"""
     if not text.startswith("---"):
         return {}, text
-    parts = text.split("---", 2)
+    parts = text.split("---", 2)  # str.split(sep, maxsplit) 最多分割 maxsplit 次
     if len(parts) < 3:
         return {}, text
     try:
+        # yaml.safe_load() 安全解析 YAML（类似 Java SnakeYAML YAML.load()）
         meta = yaml.safe_load(parts[1]) or {}
     except yaml.YAMLError:
         meta = {}

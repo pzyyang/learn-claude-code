@@ -253,6 +253,7 @@ def create_agent(name: str, level: int, output_dir: Path):
 
 
 def main():
+    # argparse 是 Python 的命令行参数解析库（类似 Java 的 JCommander 或 Args4j）
     parser = argparse.ArgumentParser(
         description="Scaffold a new AI coding agent project",
         formatter_class=argparse.RawDescriptionHelpFormatter,
@@ -265,13 +266,14 @@ Levels:
   4  Skills (~550)       - + Skill tool for domain expertise
         """
     )
+    # add_argument() 添加命令行参数（类似 Java 的 @Parameter 注解）
     parser.add_argument("name", help="Name of the agent to create")
     parser.add_argument("--level", type=int, default=1, choices=[0, 1, 2, 3, 4],
                        help="Complexity level (default: 1)")
     parser.add_argument("--path", type=Path, default=Path.cwd(),
                        help="Output directory (default: current directory)")
 
-    args = parser.parse_args()
+    args = parser.parse_args()  # 解析命令行参数（Java: JCommander.parse(argv, target)）
     create_agent(args.name, args.level, args.path)
 
 

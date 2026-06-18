@@ -75,6 +75,8 @@ VALID_MSG_TYPES = {
 
 
 # -- MessageBus: JSONL inbox per teammate --
+# 基于文件的邮箱系统：每个 teammate 一个 .jsonl 文件（JSON Lines 格式）
+# 类似 Java 中的简单消息队列（JMS / RabbitMQ 的轻量替代）
 class MessageBus:
     def __init__(self, inbox_dir: Path):
         self.dir = inbox_dir
@@ -88,24 +90,27 @@ class MessageBus:
             "type": msg_type,
             "from": sender,
             "content": content,
-            "timestamp": time.time(),
+            "timestamp": time.time(),  # Unix 时间戳（类似 Java System.currentTimeMillis() / 1000.0）
         }
         if extra:
-            msg.update(extra)
+            msg.update(extra)  # dict.update() 合并另一个 dict（类似 Java map.putAll()）
         inbox_path = self.dir / f"{to}.jsonl"
+        # with open(path, "a") 追加模式（类似 Java new FileWriter(path, true)）
         with open(inbox_path, "a") as f:
             f.write(json.dumps(msg) + "\n")
         return f"Sent {msg_type} to {to}"
 
     def read_inbox(self, name: str) -> list:
+        """读取并清空 inbox（drain 模式）"""
         inbox_path = self.dir / f"{name}.jsonl"
         if not inbox_path.exists():
             return []
         messages = []
+        # 逐行解析 JSON（JSONL 格式，每行一个 JSON 对象）
         for line in inbox_path.read_text().strip().splitlines():
             if line:
-                messages.append(json.loads(line))
-        inbox_path.write_text("")
+                messages.append(json.loads(line))  # json.loads() 反序列化（类似 Java Jackson ObjectMapper.readValue()）
+        inbox_path.write_text("")  # 清空文件 = drain
         return messages
 
     def broadcast(self, sender: str, content: str, teammates: list) -> str:

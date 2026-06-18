@@ -49,21 +49,30 @@ Prefer tools over prose."""
 
 
 # -- TodoManager: structured state the LLM writes to --
+# Python 类定义（class），类似 Java 的 class TodoManager
+# __init__ 是构造器（Java 的 constructor），self 相当于 Java 的 this
 class TodoManager:
     def __init__(self):
+        # 实例变量不需要事先声明类型（动态类型语言特性）
         self.items = []
 
     def update(self, items: list) -> str:
+        # len() 获取列表长度（Java: items.size()）
         if len(items) > 20:
+            # raise 抛异常（Java: throw new ValueError("...")）
             raise ValueError("Max 20 todos allowed")
         validated = []
         in_progress_count = 0
+        # enumerate() 返回 (index, value) 对（Java 没有内置对应，需手动计数）
         for i, item in enumerate(items):
+            # str() 类型转换（Java: String.valueOf() 或 .toString()）
+            # dict.get(key, default) 安全取值（Java: map.getOrDefault(key, default)）
             text = str(item.get("text", "")).strip()
             status = str(item.get("status", "pending")).lower()
             item_id = str(item.get("id", str(i + 1)))
             if not text:
                 raise ValueError(f"Item {item_id}: text required")
+            # Python 用 in 判断成员（Java: !Arrays.asList(...).contains(status)）
             if status not in ("pending", "in_progress", "completed"):
                 raise ValueError(f"Item {item_id}: invalid status '{status}'")
             if status == "in_progress":
@@ -79,10 +88,13 @@ class TodoManager:
             return "No todos."
         lines = []
         for item in self.items:
+            # dict 作为查找表（类似 Java 的 Map.of().get() 或 switch expression）
             marker = {"pending": "[ ]", "in_progress": "[>]", "completed": "[x]"}[item["status"]]
             lines.append(f"{marker} #{item['id']}: {item['text']}")
+        # sum(生成器表达式) 一行统计（类似 Java: items.stream().filter(t -> t.status == "completed").count()）
         done = sum(1 for t in self.items if t["status"] == "completed")
         lines.append(f"\n({done}/{len(self.items)} completed)")
+        # "\n".join(list) 用换行符拼接列表（Java: String.join("\n", list)）
         return "\n".join(lines)
 
 

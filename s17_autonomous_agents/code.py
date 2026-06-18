@@ -22,6 +22,7 @@ ASCII lifecycle:
 import os, subprocess, json, time, random, threading
 from pathlib import Path
 from datetime import datetime
+# dataclass + asdict: 自动生成数据类方法 + 转换为字典（类似 Java Record + Jackson ObjectMapper）
 from dataclasses import dataclass, asdict, field
 
 try:

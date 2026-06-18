@@ -55,10 +55,12 @@ SYSTEM = (
 )
 
 # s06: subagent gets its own system prompt — no task, no recursion
+# 子 Agent 的 System Prompt（不同角色使用不同指令，类似多态）
+# 子 Agent 不知道父 Agent 的上下文（context isolation 的核心）
 SUB_SYSTEM = (
     f"You are a coding agent at {WORKDIR}. "
     "Complete the task you were given, then return a concise summary. "
-    "Do not delegate further."
+    "Do not delegate further."  # 防止无限递归
 )
 
 

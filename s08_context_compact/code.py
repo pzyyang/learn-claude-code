@@ -262,10 +262,12 @@ def spawn_subagent(task: str) -> str:
 #  NEW in s08: Four-Layer Compaction Pipeline
 # ═══════════════════════════════════════════════════════════
 
-CONTEXT_LIMIT = 50000
-KEEP_RECENT = 3
-PERSIST_THRESHOLD = 30000
+# 压缩流水线参数（类似 Java 中的 static final 常量）
+CONTEXT_LIMIT = 50000   # 上下文 token 上限，超过则触发自动压缩
+KEEP_RECENT = 3         # 保留最近 N 个工具结果，旧结果可被压缩
+PERSIST_THRESHOLD = 30000  # 超过此大小的工具输出将持久化到文件
 
+# len(str(msgs)) 估算消息的字符数（用于判断是否需要压缩）
 def estimate_size(msgs): return len(str(msgs))
 
 def _block_type(block):

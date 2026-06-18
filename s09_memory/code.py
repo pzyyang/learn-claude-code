@@ -53,6 +53,8 @@ MODEL = os.environ["MODEL_ID"]
 #  NEW in s09: Memory System
 # ═══════════════════════════════════════════════════════════
 
+# 记忆类型（类似 Java enum，但 Python 用字符串列表更灵活）
+# user=用户偏好, feedback=用户反馈, project=项目事实, reference=外部引用
 MEMORY_TYPES = ["user", "feedback", "project", "reference"]
 
 def _parse_frontmatter(text: str) -> tuple[dict, str]:
